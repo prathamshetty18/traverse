@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Traverse – The Ultimate Vacay</title>
+  <style>
+    /* ----------  CSS  ---------- */
+    *{box-sizing:border-box;margin:0;padding:0}
+    body,html{font-family:'Poppins',sans-serif;width:100%;height:100%;color:#fff;overflow:hidden}
+    .bg-container{position:fixed;inset:0;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);overflow:hidden;z-index:-1}
+    .bg-orb{position:absolute;border-radius:50%;filter:blur(60px);opacity:.5;animation:float-orb 20s ease-in-out infinite;pointer-events:none;transition:transform .3s ease-out}
+    .orb1{width:400px;height:400px;background:radial-gradient(circle,#ff6b9d,transparent);top:-100px;left:-100px;animation-delay:0s}
+    .orb2{width:350px;height:350px;background:radial-gradient(circle,#4ecdc4,transparent);bottom:-100px;right:-100px;animation-delay:5s}
+    .orb3{width:300px;height:300px;background:radial-gradient(circle,#ffd93d,transparent);top:50%;left:50%;animation-delay:10s}
+    @keyframes float-orb{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(50px,100px) scale(1.1)}50%{transform:translate(-30px,-50px) scale(.9)}75%{transform:translate(-80px,80px) scale(1.05)}}
+    .particles{position:absolute;width:100%;height:100%}
+    .particle{position:absolute;width:3px;height:3px;background:#fff;border-radius:50%;opacity:.6;animation:float-particle linear infinite}
+    @keyframes float-particle{0%{transform:translateY(100vh) translateX(0);opacity:0}10%{opacity:.6}90%{opacity:.6}100%{transform:translateY(-100px) translateX(100px);opacity:0}}
+    .page{position:absolute;inset:0;width:100%;height:100%;opacity:0;display:none;transition:opacity .5s ease}
+    .page.active{display:flex;opacity:1}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+    .login-page,.entry-page{display:flex;align-items:center;justify-content:center;text-align:center}
+    .login-container,.entry-overlay{position:relative;z-index:2;background:rgba(0,0,0,.3);backdrop-filter:blur(15px);padding:3rem 4rem;border-radius:30px;box-shadow:0 8px 32px rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.2);animation:fadeIn 1s ease;max-width:450px;width:90%}
+    .login-container h1,.entry-overlay h1{margin-bottom:.5rem;font-size:2.8rem;font-weight:700;animation:float 3s ease-in-out infinite}
+    .login-container p{opacity:.9;margin-bottom:2rem;font-size:1rem}
+    .user-welcome{font-size:1.1rem;margin-bottom:1.5rem;opacity:.9}
+    .input-group{margin-bottom:1.5rem;text-align:left}
+    .input-group label{display:block;margin-bottom:.5rem;font-size:.9rem;font-weight:500}
+    .login-container input{padding:1rem 1.5rem;width:100%;border-radius:15px;border:1px solid rgba(255,255,255,.2);outline:none;font-size:1rem;color:#222;transition:all .3s ease;box-shadow:0 4px 15px rgba(0,0,0,.2);background:#fff}
+    .entry-overlay input{padding:1rem 1.5rem;width:100%;max-width:320px;border-radius:40px;border:1px solid rgba(255,255,255,.2);outline:none;font-size:1rem;text-align:center;color:#222;transition:all .3s ease;box-shadow:0 4px 15px rgba(0,0,0,.2);background:#fff;margin-bottom:1.2rem}
+    .login-container input:focus,.entry-overlay input:focus{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,203,169,.4);border-color:#00cba9}
+    .login-container button,.entry-overlay button{background:linear-gradient(135deg,#00cba9,#00b894);color:#fff;padding:1rem 2rem;border:none;border-radius:15px;cursor:pointer;font-size:1.1rem;font-weight:600;transition:all .3s ease;position:relative;overflow:hidden;width:100%;margin-top:1rem}
+    .entry-overlay button{width:auto;border-radius:40px;margin:.5rem}
+    .login-container button:hover,.entry-overlay button:hover{background:linear-gradient(135deg,#00b894,#009f7b);transform:translateY(-2px);box-shadow:0 6px 25px rgba(0,255,200,.5)}
+    .logout-btn{background:linear-gradient(135deg,#ff6b6b,#ee5a6f)!important;font-size:.9rem!important;padding:.8rem 1.5rem!important}
+    .logout-btn:hover{background:linear-gradient(135deg,#ee5a6f,#c44569)!important}
+    .toggle-form{margin-top:1.5rem;font-size:.9rem}
+    .toggle-form a{color:#00cba9;cursor:pointer;text-decoration:none;font-weight:600;transition:all .3s ease}
+    .toggle-form a:hover{color:#00e0b8}
+    .planner-page{overflow-y:auto;padding:2rem;height:100%;display:block}
+    .back-button{position:fixed;top:1.5rem;left:1.5rem;background:rgba(255,255,255,.2);backdrop-filter:blur(10px);border:1.5px solid rgba(255,255,255,.4);color:#fff;padding:.4rem 1rem;border-radius:30px;cursor:pointer;font-weight:500;transition:all .3s ease;z-index:100}
+    .back-button:hover{background:rgba(255,255,255,.35);transform:translateX(-5px)}
+    h2{text-align:center;font-size:2rem;margin-bottom:1rem}
+    .planner-container{display:flex;flex-wrap:wrap;justify-content:center;gap:2rem;margin-top:1.5rem}
+    .planner-section{background:rgba(0,0,0,.3);border-radius:20px;padding:1.5rem;width:350px;backdrop-filter:blur(10px);box-shadow:0 4px 20px rgba(0,0,0,.3);transition:all .3s ease;border:1px solid rgba(255,255,255,.1)}
+    .planner-section.wide{width:720px}
+    .planner-section:hover{transform:translateY(-5px);box-shadow:0 8px 30px rgba(0,0,0,.4)}
+    .planner-section h3{margin-top:0;text-align:center;margin-bottom:1rem}
+    input,select,textarea{width:100%;margin:.5rem 0;padding:.6rem;border-radius:8px;border:none;outline:none;font-size:.9rem;transition:all .3s ease;box-shadow:0 2px 8px rgba(0,0,0,.1);font-family:'Poppins',sans-serif}
+    textarea{resize:vertical;min-height:60px}
+    input:focus,select:focus,textarea:focus{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,203,169,.3)}
+    button{background:#00b894;color:#fff;border:none;padding:.6rem 1rem;border-radius:8px;cursor:pointer;font-weight:600;transition:all .3s ease}
+    button:hover{background:#019875;transform:translateY(-2px);box-shadow:0 4px 15px rgba(0,184,148,.4)}
+    .activity-card{display:flex;flex-direction:column;background:rgba(176,162,11,.897);padding:1rem;margin-bottom:.6rem;border-radius:10px;transition:all .3s ease}
+    .activity-card:hover{transform:translateX(5px);box-shadow:0 4px 15px rgba(0,0,0,.3);background:rgba(196,182,31,.95)}
+    .activity-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem}
+    .activity-info{display:flex;flex-direction:column;flex:1}
+    .activity-name{font-weight:bold;font-size:1.1rem}
+    .activity-category{font-size:.8rem;opacity:.8;text-transform:capitalize}
+    .activity-details{font-size:.85rem;opacity:.9;margin-top:.3rem;line-height:1.4}
+    .activity-meta{display:flex;gap:1rem;margin-top:.5rem;flex-wrap:wrap}
+    .activity-meta-item{display:flex;align-items:center;gap:.3rem;font-size:.85rem}
+    .activity-actions button{background:transparent;color:#ff7675;font-size:1.2rem;border:none;cursor:pointer;padding:.5rem;border-radius:50%;transition:all .3s ease}
+    .activity-actions button:hover{background:rgba(255,118,117,.2);transform:scale(1.2)}
+    .empty-state{text-align:center;opacity:.7;margin-top:1rem}
+    .suggestion-item{background:rgba(255,255,255,.15);padding:.8rem;border-radius:8px;margin:.5rem 0;cursor:pointer;transition:all .3s ease;border-left:3px solid transparent}
+    .suggestion-title{font-weight:600;margin-bottom:.2rem}
+    .suggestion-desc{font-size:.8rem;opacity:.8}
+    .suggestion-item:hover{background:rgba(255,255,255,.3);transform:translateX(5px);border-left-color:#00cba9}
+    .summary{text-align:center;font-size:1.1rem;margin-top:1rem;line-height:1.8rem}
+    .summary p{margin:.5rem 0;padding:.5rem;background:rgba(255,255,255,.1);border-radius:8px;transition:all .3s ease}
+    .summary p:hover{background:rgba(255,255,255,.2);transform:scale(1.05)}
+    .summary span{font-weight:bold;color:#00cba9;font-size:1.2rem}
+    .date-range{display:flex;gap:.5rem;align-items:center}
+    .date-range input{flex:1}
+    .form-row{display:flex;gap:.5rem}
+    .form-row input,.form-row select{flex:1}
+    label{display:block;margin-top:.5rem;margin-bottom:.2rem;font-size:.85rem;font-weight:500}
+    .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:1rem}
+    .stat-card{background:rgba(255,255,255,.1);padding:.8rem;border-radius:8px;text-align:center}
+    .stat-value{font-size:1.5rem;font-weight:bold;color:#00cba9}
+    .stat-label{font-size:.8rem;opacity:.8;margin-top:.2rem}
+    .timeline{position:relative;padding-left:1.5rem;border-left:2px solid rgba(255,255,255,.2)}
+    .timeline-item{position:relative;margin-bottom:1rem;padding-bottom:1rem}
+    .timeline-item::before{content:'';position:absolute;left:-1.65rem;top:.5rem;width:10px;height:10px;border-radius:50%;background:#00cba9;border:2px solid #fff}
+    .day-header{font-weight:bold;margin-bottom:.3rem;color:#00cba9}
+    @media(max-width:768px){.planner-container{flex-direction:column;align-items:center}.planner-section,.planner-section.wide{width:100%;max-width:400px}.entry-overlay,.login-container{padding:2rem 2.5rem}.entry-overlay h1,.login-container h1{font-size:2rem}.stats-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+
+<body>
+  <!-- ----------  BACKGROUND  ---------- -->
+  <div class="bg-container">
+    <div class="bg-orb orb1"></div>
+    <div class="bg-orb orb2"></div>
+    <div class="bg-orb orb3"></div>
+    <div class="particles" id="particles"></div>
+  </div>
+
+  <!-- ----------  LOGIN  ---------- -->
+  <div class="page login-page active" id="loginPage">
+    <div class="login-container">
+      <h1>🌍 Traverse</h1>
+      <p>Your Ultimate Travel Planning Companion</p>
+
+      <div id="loginForm">
+        <div class="input-group">
+          <label>Email</label>
+          <input type="email" id="loginEmail" placeholder="your@email.com" />
+        </div>
+        <div class="input-group">
+          <label>Password</label>
+          <input type="password" id="loginPassword" placeholder="••••••••" />
+        </div>
+        <button onclick="handleLogin()">Login</button>
+        <div class="toggle-form">Don't have an account? <a onclick="toggleForm()">Sign up</a></div>
+      </div>
+
+      <div id="signupForm" style="display:none;">
+        <div class="input-group">
+          <label>Full Name</label>
+          <input type="text" id="signupName" placeholder="John Doe" />
+        </div>
+        <div class="input-group">
+          <label>Email</label>
+          <input type="email" id="signupEmail" placeholder="your@email.com" />
+        </div>
+        <div class="input-group">
+          <label>Password</label>
+          <input type="password" id="signupPassword" placeholder="••••••••" />
+        </div>
+        <button onclick="handleSignup()">Sign Up</button>
+        <div class="toggle-form">Already have an account? <a onclick="toggleForm()">Login</a></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ----------  ENTRY  ---------- -->
+  <div class="page entry-page" id="entryPage">
+    <div class="entry-overlay">
+      <h1>🌍 Traverse</h1>
+      <p class="user-welcome">Welcome, <span id="userName">Traveler</span>! ✨</p>
+      <input type="text" id="destinationInput" placeholder="Where do you want to go?" />
+      <br />
+      <button onclick="startPlanning()">Start Planning</button>
+      <button class="logout-btn" onclick="handleLogout()">Logout</button>
+    </div>
+  </div>
+
+  <!-- ----------  PLANNER  ---------- -->
+  <div class="page planner-page" id="plannerPage">
+    <button class="back-button" onclick="goBack()">← Back</button>
+    <h2 id="destinationTitle">Your Trip Plan</h2>
+
+    <div class="planner-container">
+      <!-- Trip Details -->
+      <div class="planner-section wide">
+        <h3>✈️ Trip Details</h3>
+        <div class="form-row">
+          <div style="flex:2;">
+            <label>Destination</label>
+            <input type="text" id="tripDestination" placeholder="e.g., Paris, France" />
+          </div>
+          <div>
+            <label>Travelers</label>
+            <input type="number" id="travelerCount" min="1" value="2" onchange="updateCostSummary()" />
+          </div>
+        </div>
+        <label>Travel Dates</label>
+        <div class="date-range">
+          <input type="date" id="startDate" />
+          <span>to</span>
+          <input type="date" id="endDate" />
+        </div>
+        <label>Trip Description (optional)</label>
+        <textarea id="tripDescription" placeholder="Describe your trip goals, preferences, or special occasions..."></textarea>
+      </div>
+
+      <!-- Suggested Activities -->
+      <div class="planner-section">
+        <h3>💡 Suggested Activities</h3>
+        <div id="suggestions"></div>
+      </div>
+
+      <!-- Add Activity -->
+      <div class="planner-section">
+        <h3>➕ Add Activity</h3>
+        <label>Activity Name</label>
+        <input type="text" id="activityName" placeholder="e.g., Eiffel Tower Visit" />
+
+        <label>Category</label>
+        <select id="activityCategory">
+          <option value="sightseeing">🏛️ Sightseeing</option>
+          <option value="food">🍽️ Food & Dining</option>
+          <option value="shopping">🛍️ Shopping</option>
+          <option value="adventure">🏃 Adventure</option>
+          <option value="culture">🎭 Culture</option>
+          <option value="relaxation">🧘 Relaxation</option>
+          <option value="nightlife">🌃 Nightlife</option>
+        </select>
+
+        <div class="form-row">
+          <div>
+            <label>Cost ($)</label>
+            <input type="number" id="activityCost" placeholder="50" />
+          </div>
+          <div>
+            <label>Duration (hrs)</label>
+            <input type="number" id="activityDuration" placeholder="2" step="0.5" />
+          </div>
+        </div>
+
+        <label>Day</label>
+        <input type="number" id="activityDay" placeholder="1" min="1" />
+
+        <label>Time</label>
+        <input type="time" id="activityTime" />
+
+        <label>Notes (optional)</label>
+        <textarea id="activityNotes" placeholder="Special instructions, booking info, etc."></textarea>
+
+        <button onclick="addActivity()">+ Add Activity</button>
+      </div>
+
+      <!-- Itinerary -->
+      <div class="planner-section wide">
+        <h3>📋 Itinerary</h3>
+        <div id="activitiesList"></div>
+      </div>
+
+      <!-- Summary -->
+      <div class="planner-section">
+        <h3>📊 Trip Summary</h3>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="activityCount">0</div>
+            <div class="stat-label">Activities</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="totalDuration">0h</div>
+            <div class="stat-label">Total Time</div>
+          </div>
+        </div>
+        <div class="summary">
+          <p>Total Cost: <span id="totalCost">$0.00</span></p>
+          <p>Per Person: <span id="perPersonCost">$0.00</span></p>
+        </div>
+        <div style="text-align:center;margin-top:1rem;">
+          <button onclick="savePlan()">💾 Save Plan</button>
+          <button onclick="loadPlan()">📂 Load Plan</button>
+          <button onclick="printItinerary()">🖨️ Print</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ----------  PARTICLES  ---------- */
+    function createParticles() {
+      const container = document.getElementById('particles');
+      for (let i = 0; i < 30; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.animationDuration = (Math.random() * 10 + 10) + 's';
+        p.style.animationDelay = Math.random() * 5 + 's';
+        container.appendChild(p);
+      }
+    }
+    createParticles();
+
+    /* ----------  MOUSE PARALLAX  ---------- */
+    document.addEventListener('mousemove', e => {
+      const orbs = document.querySelectorAll('.bg-orb');
+      const x = e.clientX / window.innerWidth;
+      const y = e.clientY / window.innerHeight;
+      orbs.forEach((orb, i) => {
+        const speed = (i + 1) * 20;
+        const xMove = (x - .5) * speed;
+        const yMove = (y - .5) * speed;
+        orb.style.transform = `translate(${xMove}px, ${yMove}px)`;
+      });
+    });
+
+    /* ----------  DESTINATION KNOWLEDGE BASE  ---------- */
+    const destinationData = {
+      "Paris": {
+        activities: [
+          {name: "Eiffel Tower Tour", desc: "Visit the iconic symbol of Paris with skip-the-line access", cost: 35, duration: 2},
+          {name: "Louvre Museum", desc: "Explore the world's largest art museum", cost: 20, duration: 4},
+          {name: "Seine River Cruise", desc: "Romantic evening cruise with dinner", cost: 75, duration: 2.5},
+          {name: "Montmartre Walk", desc: "Discover the artistic neighborhood and Sacré-Cœur", cost: 0, duration: 3}
+        ]
+      },
+      "Tokyo": {
+        activities: [
+          {name: "Senso-ji Temple", desc: "Tokyo's oldest and most famous temple", cost: 0, duration: 2},
+          {name: "Tokyo Tower", desc: "Panoramic city views from observation deck", cost: 15, duration: 1.5},
+          {name: "Shibuya Crossing", desc: "Experience the world's busiest intersection", cost: 0, duration: 1},
+          {name: "Tsukiji Market", desc: "Fresh sushi breakfast at the outer market", cost: 30, duration: 2}
+        ]
+      },
+      "New York": {
+        activities: [
+          {name: "Statue of Liberty", desc: "Ferry tour to Liberty Island and Ellis Island", cost: 25, duration: 4},
+          {name: "Central Park", desc: "Bike rental and picnic in the park", cost: 20, duration: 3},
+          {name: "Times Square", desc: "Broadway show and dinner", cost: 150, duration: 4},
+          {name: "Brooklyn Bridge", desc: "Walk across the iconic bridge at sunset", cost: 0, duration: 1.5}
+        ]
+      },
+      "London": {
+        activities: [
+          {name: "Big Ben & Parliament", desc: "Guided tour of Westminster", cost: 30, duration: 2},
+          {name: "British Museum", desc: "Free entry to world-famous collections", cost: 0, duration: 3},
+          {name: "Tower Bridge", desc: "Walk the glass floor and visit exhibition", cost: 12, duration: 1.5},
+          {name: "Buckingham Palace", desc: "Changing of the Guard ceremony", cost: 0, duration: 1}
+        ]
+      },
+      "Dubai": {
+        activities: [
+          {name: "Burj Khalifa", desc: "Visit the world's tallest building at sunset", cost: 45, duration: 2},
+          {name: "Desert Safari", desc: "4x4 adventure with BBQ dinner", cost: 85, duration: 6},
+          {name: "Dubai Mall", desc: "Shopping and Dubai Aquarium visit", cost: 35, duration: 4},
+          {name: "Gold Souk", desc: "Traditional market shopping experience", cost: 0, duration: 2}
+        ]
+      }
+    };
+
+    /* ----------  APP STATE  ---------- */
+    let tripPlan = {
+      destination: "",
+      travelers: 2,
+      activities: [],
+    };
+
+    /* ----------  PAGE NAV  ---------- */
+    const pages = {
+      login: document.getElementById('loginPage'),
+      entry: document.getElementById('entryPage'),
+      planner: document.getElementById('plannerPage')
+    };
+
+    function showPage(name) {
+      Object.values(pages).forEach(p => p.classList.remove('active'));
+      pages[name].classList.add('active');
+    }
+
+    /* ----------  AUTH  ---------- */
+    function toggleForm() {
+      const login = document.getElementById('loginForm');
+      const signup = document.getElementById('signupForm');
+      login.style.display = login.style.display === 'none' ? 'block' : 'none';
+      signup.style.display = signup.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function handleLogin() {
+      const email = document.getElementById('loginEmail').value.trim();
+      if (!email) return alert("Please enter your email.");
+      localStorage.setItem('traverseUser', email);
+      document.getElementById('userName').textContent = email.split('@')[0];
+      showPage('entry');
+    }
+
+    function handleSignup() {
+      const name = document.getElementById('signupName').value.trim();
+      const email = document.getElementById('signupEmail').value.trim();
+      if (!name || !email) return alert("Please fill in all fields.");
+      localStorage.setItem('traverseUser', email);
+      document.getElementById('userName').textContent = name;
+      showPage('entry');
+    }
+
+    function handleLogout() {
+      localStorage.removeItem('traverseUser');
+      showPage('login');
+    }
+
+    /* ----------  ENTRY  ---------- */
+    function startPlanning() {
+      const dest = document.getElementById('destinationInput').value.trim();
+      if (!dest) return alert("Where would you like to go?");
+      tripPlan.destination = dest;
+      document.getElementById('tripDestination').value = dest;
+      document.getElementById('destinationTitle').textContent = `Your ${dest} Trip`;
+      showPage('planner');
+      loadSuggestions(dest);
+    }
+
+    function goBack() {
+      showPage('entry');
+    }
+
+    /* ----------  SUGGESTIONS  ---------- */
+    function loadSuggestions(dest) {
+      const container = document.getElementById('suggestions');
+      container.innerHTML = "";
+      const city = Object.keys(destinationData).find(c => dest.toLowerCase().includes(c.toLowerCase()));
+      if (!city) return container.innerHTML = '<div class="empty-state">No suggestions for this city yet. Add your own activities!</div>';
+
+      destinationData[city].activities.forEach(act => {
+        const div = document.createElement('div');
+        div.className = 'suggestion-item';
+        div.innerHTML = `<div class="suggestion-title">${act.name}</div><div class="suggestion-desc">${act.desc} · $${act.cost} · ${act.duration}h</div>`;
+        div.onclick = () => quickAdd(act);
+        container.appendChild(div);
+      });
+    }
+
+    function quickAdd(act) {
+      const newAct = {
+        id: Date.now(),
+        name: act.name,
+        category: 'sightseeing',
+        cost: act.cost,
+        duration: act.duration,
+        day: 1,
+        time: '10:00',
+        notes: act.desc
+      };
+      tripPlan.activities.push(newAct);
+      renderItinerary();
+    }
+
+    /* ----------  ACTIVITY CRUD  ---------- */
+    function addActivity() {
+      const name = document.getElementById('activityName').value.trim();
+      if (!name) return alert("Activity name required.");
+      const newAct = {
+        id: Date.now(),
+        name,
+        category: document.getElementById('activityCategory').value,
+        cost: +document.getElementById('activityCost').value || 0,
+        duration: +document.getElementById('activityDuration').value || 1,
+        day: +document.getElementById('activityDay').value || 1,
+        time: document.getElementById('activityTime').value || '10:00',
+        notes: document.getElementById('activityNotes').value
+      };
+      tripPlan.activities.push(newAct);
+      renderItinerary();
+      // reset form
+      document.getElementById('activityName').value = '';
+      document.getElementById('activityCost').value = '';
+      document.getElementById('activityDuration').value = '';
+      document.getElementById('activityNotes').value = '';
+    }
+
+    function deleteActivity(id) {
+      tripPlan.activities = tripPlan.activities.filter(a => a.id !== id);
+      renderItinerary();
+    }
+
+    /* ----------  RENDER  ---------- */
+    function renderItinerary() {
+      const container = document.getElementById('activitiesList');
+      container.innerHTML = "";
+      if (tripPlan.activities.length === 0) return container.innerHTML = '<div class="empty-state">No activities yet. Add or pick from suggestions!</div>';
+
+      // sort by day then time
+      const sorted = [...tripPlan.activities].sort((a, b) => a.day - b.day || a.time.localeCompare(b.time));
+      let currentDay = null;
+      sorted.forEach(act => {
+        if (act.day !== currentDay) {
+          const header = document.createElement('div');
+          header.className = 'day-header';
+          header.textContent = `Day ${act.day}`;
+          container.appendChild(header);
+          currentDay = act.day;
+        }
+        const card = document.createElement('div');
+        card.className = 'activity-card';
+        card.innerHTML = `
+          <div class="activity-header">
+            <div class="activity-info">
+              <div class="activity-name">${act.name}</div>
+              <div class="activity-category">${act.category}</div>
+            </div>
+            <div class="activity-actions">
+              <button onclick="deleteActivity(${act.id})">🗑️</button>
+            </div>
+          </div>
+          <div class="activity-details">${act.notes || ''}</div>
+          <div class="activity-meta">
+            <div class="activity-meta-item">💰 $${act.cost}</div>
+            <div class="activity-meta-item">⏱️ ${act.duration}h</div>
+            <div class="activity-meta-item">🕒 ${act.time}</div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+      updateCostSummary();
+    }
+
+    function updateCostSummary() {
+      const travelers = +document.getElementById('travelerCount').value || 1;
+      const totalCost = tripPlan.activities.reduce((s, a) => s + a.cost, 0);
+      const totalDuration = tripPlan.activities.reduce((s, a) => s + a.duration, 0);
+      document.getElementById('activityCount').textContent = tripPlan.activities.length;
+      document.getElementById('totalDuration').textContent = totalDuration + 'h';
+      document.getElementById('totalCost').textContent = '$' + totalCost.toFixed(2);
+      document.getElementById('perPersonCost').textContent = '$' + (totalCost / travelers).toFixed(2);
+    }
+
+    /* ----------  LOCAL SAVE / LOAD  ---------- */
+    function savePlan() {
+      tripPlan.travelers = +document.getElementById('travelerCount').value || 2;
+      tripPlan.startDate = document.getElementById('startDate').value;
+      tripPlan.endDate = document.getElementById('endDate').value;
+      tripPlan.description = document.getElementById('tripDescription').value;
+      localStorage.setItem('traversePlan', JSON.stringify(tripPlan));
+      alert("Trip saved locally!");
+    }
+
+    function loadPlan() {
+      const raw = localStorage.getItem('traversePlan');
+      if (!raw) return alert("No saved plan found.");
+      tripPlan = JSON.parse(raw);
+      document.getElementById('tripDestination').value = tripPlan.destination || '';
+      document.getElementById('travelerCount').value = tripPlan.travelers || 2;
+      document.getElementById('startDate').value = tripPlan.startDate || '';
+      document.getElementById('endDate').value = tripPlan.endDate || '';
+      document.getElementById('tripDescription').value = tripPlan.description || '';
+      document.getElementById('destinationTitle').textContent = tripPlan.destination ? `Your ${tripPlan.destination} Trip` : 'Your Trip Plan';
+      renderItinerary();
+      loadSuggestions(tripPlan.destination);
+    }
+
+    /* ----------  PRINT  ---------- */
+    function printItinerary() {
+      window.print();
+    }
+
+    /* ----------  AUTO-LOGIN IF USER EXISTS  ---------- */
+    window.onload = () => {
+      const user = localStorage.getItem('traverseUser');
+      if (user) {
+        document.getElementById('userName').textContent = user.split('@')[0];
+        showPage('entry');
+      } else showPage('login');
+    };
+  </script>
+</body>
+</html>
